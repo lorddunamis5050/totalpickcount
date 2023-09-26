@@ -31,9 +31,14 @@ def perform_regular_pick_analysis(df , book):
     # Count the sum of 'Quantity' for 'REGULAR PICK' actions per user within the time range for REGULAR PICK
     regular_pick_per_user = filtered_df_regular[filtered_df_regular['Action'] == 'REGULAR PICK'].groupby('UserID')['Quantity'].sum().reset_index(name='RegularPickQuantity')
 
+
+    regular_pick_per_user['RegularPickQuantity'] = abs(regular_pick_per_user['RegularPickQuantity'])
+
     # Create a new Excel workbook (ensure you have the 'book' variable defined in the main script)
     regular_pick_sheet = book.create_sheet('REGULAR PICK')
 
     # Write the REGULAR PICK data to an Excel sheet
     for row_data in dataframe_to_rows(regular_pick_per_user, index=False, header=True):
         regular_pick_sheet.append(row_data)
+
+    print("REGULAR PICKING analysis completed.")
