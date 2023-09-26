@@ -49,7 +49,7 @@ def perform_regular_pick_analysis(df , book):
 
 
 
-        # Create the "PUTWALL PICKING" sheet if it doesn't exist
+        # Create the "REGULAR PICKING" sheet if it doesn't exist
     if 'REGULAR PICK' not in book.sheetnames:
         regular_pick_sheet = book.create_sheet('REGULAR PICK')
     else:
