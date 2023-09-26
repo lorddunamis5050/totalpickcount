@@ -44,8 +44,6 @@ def perform_replenishment_pick_analysis(df, book):
     replenishment_pick_per_user['ReplenishmentPickQuantity'] = abs(replenishment_pick_per_user['ReplenishmentPickQuantity'])
     replenishment_pick_per_user['UPH'] = abs(replenishment_pick_per_user['UPH'])
 
-    # Create a new Excel workbook (ensure you have the 'book' variable defined in the main script)
-    replenishment_pick_sheet = book.create_sheet('REPLENISHMENT PICK')
 
             # Create the "REPLENISHMENT  PICKING" sheet if it doesn't exist
     if 'REPLENISHMENT PICK' not in book.sheetnames:

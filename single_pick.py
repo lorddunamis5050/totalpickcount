@@ -24,15 +24,47 @@ def perform_single_pick_analysis(df , book):
     # Apply the function to the DataFrame to identify "SINGLE PICK"
     df['IsSinglePick'] = df.apply(is_single_pick, axis=1)
 
+
     # Filter rows based on the criteria for "SINGLE PICK"
     single_pick_df = df[df['IsSinglePick']]
+
+             # Find the highest time worked by any user within the time range
+    highest_hours_worked = (single_pick_df.groupby('UserID')['DateTime']
+                             .agg(lambda x: (x.max() - x.min()).total_seconds() / 3600)
+                             .max())
+
 
     # Count the sum of 'Quantity' for "SINGLE PICK" actions per user within the time range for PUTWALL PICKING
     single_pick_per_user = single_pick_df.groupby('UserID')['Quantity'].sum().reset_index(name='SinglePickQuantity')
 
-    # Create a new Excel workbook (ensure you have the 'book' variable defined in the main script)
-    single_pick_sheet = book.create_sheet('SINGLE PICK')
+    # Calculate UPH for each user, using the highest time as the denominator
+    single_pick_per_user['UPH'] = single_pick_per_user['SinglePickQuantity'] / highest_hours_worked
 
-    # Write the SINGLE PICK data to an Excel sheet
-    for row_data in dataframe_to_rows(single_pick_per_user, index=False, header=True):
+
+    # Convert both "PutwallPickingQuantity" and "UPH" values to their absolute values
+    single_pick_per_user['SinglePickQuantity'] = abs(single_pick_per_user['SinglePickQuantity'])
+    single_pick_per_user['UPH'] = abs(single_pick_per_user['UPH'])
+
+
+
+
+    # Create the "REPLENISHMENT  PICKING" sheet if it doesn't exist
+    if 'SINGLE PICK' not in book.sheetnames:
+        single_pick_sheet = book.create_sheet('SINGLE PICK')
+    else:
+        single_pick_sheet = book['SINGLE PICK']
+
+    # Write the header row
+    header_row = ['UserID', 'SinglePickQuantity', 'UPH']
+    single_pick_sheet.append(header_row)
+
+    # Convert the DataFrame to a list of lists for writing to Excel
+    single_picking_data = single_pick_per_user[['UserID', 'SinglePickQuantity', 'UPH']].values.tolist()
+
+
+        # Write the data to the Excel sheet
+    for row_data in single_picking_data:
         single_pick_sheet.append(row_data)
+
+    print("Effufilment PICKING analysis completed.")
+
