@@ -28,17 +28,43 @@ def perform_regular_pick_analysis(df , book):
     # Filter rows based on the specified time range for REGULAR PICK
     filtered_df_regular = df[(df['DateTime'] >= START_TIME_REGULAR) & (df['DateTime'] <= END_TIME_REGULAR)]
 
-    # Count the sum of 'Quantity' for 'REGULAR PICK' actions per user within the time range for REGULAR PICK
-    regular_pick_per_user = filtered_df_regular[filtered_df_regular['Action'] == 'REGULAR PICK'].groupby('UserID')['Quantity'].sum().reset_index(name='RegularPickQuantity')
+     # Find the highest time worked by any user within the time range
+    highest_hours_worked = (filtered_df_regular.groupby('UserID')['DateTime']
+                             .agg(lambda x: (x.max() - x.min()).total_seconds() / 3600)
+                             .max())
+    
+        # Group by "UserID" and calculate total Units picked
+    regular_pick_per_user = filtered_df_regular[filtered_df_regular['Action'] == 'REGULAR PICK'].groupby('UserID').agg(
+        RegularPickQuantity=('Quantity', 'sum')
+    ).reset_index()
+
+        # Calculate UPH for each user, using the highest time as the denominator
+    regular_pick_per_user['UPH'] = regular_pick_per_user['RegularPickQuantity'] / highest_hours_worked
 
 
+        # Convert both "PutwallPickingQuantity" and "UPH" values to their absolute values
     regular_pick_per_user['RegularPickQuantity'] = abs(regular_pick_per_user['RegularPickQuantity'])
+    regular_pick_per_user['UPH'] = abs(regular_pick_per_user['UPH'])
 
-    # Create a new Excel workbook (ensure you have the 'book' variable defined in the main script)
-    regular_pick_sheet = book.create_sheet('REGULAR PICK')
 
-    # Write the REGULAR PICK data to an Excel sheet
-    for row_data in dataframe_to_rows(regular_pick_per_user, index=False, header=True):
+
+
+        # Create the "PUTWALL PICKING" sheet if it doesn't exist
+    if 'REGULAR PICK' not in book.sheetnames:
+        regular_pick_sheet = book.create_sheet('REGULAR PICK')
+    else:
+        regular_pick_sheet = book['REGULAR PICK']
+
+            # Write the header row
+    header_row = ['UserID', 'RegularPickQuantity', 'UPH']
+    regular_pick_sheet.append(header_row)
+
+        # Convert the DataFrame to a list of lists for writing to Excel
+    regular_picking_data = regular_pick_per_user[['UserID', 'RegularPickQuantity', 'UPH']].values.tolist()
+
+    # Write the data to the Excel sheet
+    for row_data in regular_picking_data:
         regular_pick_sheet.append(row_data)
+
 
     print("REGULAR PICKING analysis completed.")
