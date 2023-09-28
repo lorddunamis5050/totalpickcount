@@ -31,6 +31,9 @@ perform_single_pick_analysis(df, book)
 from replenishment_pick import perform_replenishment_pick_analysis
 perform_replenishment_pick_analysis(df, book)
 
+from idle_time import perform_idle_time_analysis
+perform_idle_time_analysis(df, book)
+
 from hourly_pick_totals import perform_hourly_pick_totals_analysis
 perform_hourly_pick_totals_analysis(df, book)
 

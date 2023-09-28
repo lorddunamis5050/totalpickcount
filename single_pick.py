@@ -11,31 +11,38 @@ def perform_single_pick_analysis(df , book):
     single_pick_per_user = pd.DataFrame(columns=['UserID', 'SinglePickQuantity'])
 
     # Function to check for "SINGLE PICK"
-    def is_single_pick(row):
+
+    
+    def modify_action_single_pick(row):
         action = row['Action']
         packslip = row['Packslip']
         datetime = row['DateTime']
 
         if action == 'REPLNISH' and len(str(packslip)) >= 7 and str(packslip)[6] == 'S' and datetime >= START_TIME_PUTWALL and datetime <= END_TIME_PUTWALL:
-            return True
+            return 'SINGLE PICK'
 
-        return False
+        return action
+
 
     # Apply the function to the DataFrame to identify "SINGLE PICK"
-    df['IsSinglePick'] = df.apply(is_single_pick, axis=1)
+    df['Action'] = df.apply(modify_action_single_pick, axis=1)
 
 
     # Filter rows based on the criteria for "SINGLE PICK"
-    single_pick_df = df[df['IsSinglePick']]
+    
+
+    filtered_df_single = df[(df['DateTime'] >= START_TIME_PUTWALL) & (df['DateTime'] <=END_TIME_PUTWALL)]
 
              # Find the highest time worked by any user within the time range
-    highest_hours_worked = (single_pick_df.groupby('UserID')['DateTime']
+    highest_hours_worked = (filtered_df_single.groupby('UserID')['DateTime']
                              .agg(lambda x: (x.max() - x.min()).total_seconds() / 3600)
                              .max())
 
 
     # Count the sum of 'Quantity' for "SINGLE PICK" actions per user within the time range for PUTWALL PICKING
-    single_pick_per_user = single_pick_df.groupby('UserID')['Quantity'].sum().reset_index(name='SinglePickQuantity')
+    single_pick_per_user = filtered_df_single[filtered_df_single['Action'] == 'SINGLE PICK'].groupby('UserID').agg(
+        SinglePickQuantity=('Quantity', 'sum')
+    ).reset_index()
 
     # Calculate UPH for each user, using the highest time as the denominator
     single_pick_per_user['UPH'] = single_pick_per_user['SinglePickQuantity'] / highest_hours_worked

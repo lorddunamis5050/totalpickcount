@@ -4,38 +4,41 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 
 def perform_replenishment_pick_analysis(df, book):
     # Define your desired time range for PUTWALL PICKING
-    START_TIME_PUTWALL = pd.to_datetime('8:00 PM', format='%I:%M %p')
-    END_TIME_PUTWALL = pd.to_datetime('11:59 PM', format='%I:%M %p')
+    START_TIME_REGULAR = pd.to_datetime('8:00 PM', format='%I:%M %p')
+    END_TIME_REGULAR = pd.to_datetime('11:59 PM', format='%I:%M %p')
 
     # Initialize DataFrames to store replenishment pick data
     replenishment_pick_per_user = pd.DataFrame(columns=['UserID', 'ReplenishmentPickQuantity'])
 
     # Function to check for "REPLENISHMENT PICK"
-    def is_replenishment_pick(row):
+    def modify_action(row):
         action = row['Action']
         packslip = row['Packslip']
-        datetime = row['DateTime']
 
-        if action == 'REPLNISH' and len(str(packslip)) >= 7 and str(packslip)[6] == 'P' and datetime >= START_TIME_PUTWALL and datetime <= END_TIME_PUTWALL:
-            return True
+        if action == 'REPLNISH' and len(str(packslip)) >= 7 and str(packslip)[6] == 'P':
+            return 'REPLENISHMENT PICK'
 
-        return False
+        return action
 
-    # Apply the function to the DataFrame to identify "REPLENISHMENT PICK"
-    df['IsReplenishmentPick'] = df.apply(is_replenishment_pick, axis=1)
+# Apply the modification function to the 'Action' column
+    df['Action'] = df.apply(modify_action, axis=1)
+
+    filtered_df_regular = df[(df['DateTime'] >= START_TIME_REGULAR) & (df['DateTime'] <= END_TIME_REGULAR)]
 
     # Filter rows based on the criteria for "REPLENISHMENT PICK"
-    replenishment_pick_df = df[df['IsReplenishmentPick']]
+    # replenishment_pick_df = df[df['IsReplenishmentPick']]
 
 
 
          # Find the highest time worked by any user within the time range
-    highest_hours_worked = (replenishment_pick_df.groupby('UserID')['DateTime']
+    highest_hours_worked = (filtered_df_regular.groupby('UserID')['DateTime']
                              .agg(lambda x: (x.max() - x.min()).total_seconds() / 3600)
                              .max())
 
     # Count the sum of 'Quantity' for "REPLENISHMENT PICK" actions per user within the time range for PUTWALL PICKING
-    replenishment_pick_per_user = replenishment_pick_df.groupby('UserID')['Quantity'].sum().reset_index(name='ReplenishmentPickQuantity')
+    replenishment_pick_per_user = filtered_df_regular[filtered_df_regular['Action'] == 'REPLENISHMENT PICK'].groupby('UserID').agg(
+        ReplenishmentPickQuantity = ('Quantity', 'sum')
+    ).reset_index()
 
             # Calculate UPH for each user, using the highest time as the denominator
     replenishment_pick_per_user['UPH'] = replenishment_pick_per_user['ReplenishmentPickQuantity'] / highest_hours_worked
