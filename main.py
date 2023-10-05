@@ -31,6 +31,9 @@ perform_single_pick_analysis(df, book)
 from replenishment_pick import perform_replenishment_pick_analysis
 perform_replenishment_pick_analysis(df, book)
 
+from quick_move import peform_quick_move_analysis
+peform_quick_move_analysis(df, book)
+
 from idle_time import perform_idle_time_analysis
 perform_idle_time_analysis(df, book)
 
