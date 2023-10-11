@@ -16,7 +16,7 @@ def peform_quick_move_analysis(df, book):
         action = row['Action']
         bin_label = row['BinLabel']
         
-        if action == 'MOVE-OUT' and bin_label.startswith('MW'):
+        if action == 'MOVE-IN' and bin_label.startswith('MW'):
             return 'QUICK MOVE'
         
         return action

@@ -11,12 +11,14 @@ CSV_HEADER_ROW = 2
 # Load the CSV file into a Pandas DataFrame with header starting from row 4
 df = pd.read_csv(CSV_FILE_PATH, header=CSV_HEADER_ROW)
 
+
 # Parse the 'DateTime' column with the correct format
 df['DateTime'] = pd.to_datetime(df['DateTime'], format='%I:%M %p')
 
 # Create a new Excel workbook
 output_excel_file = 'pick_counts.xlsx'
 book = openpyxl.Workbook()
+
 
 # Import and perform analysis for different pick types
 from putwall_pick import perform_putwall_pick_analysis
