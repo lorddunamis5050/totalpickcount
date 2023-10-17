@@ -17,8 +17,11 @@ def perform_replenishment_pick_analysis(df, book):
 
         if action == 'REPLNISH' and len(str(packslip)) >= 7 and str(packslip)[6] == 'P':
             return 'REPLENISHMENT PICK'
+        elif packslip == 'BIG':
+            return 'REPLENISHMENT PICK'  # OR do something else for 'BIG'
 
         return action
+
 
 # Apply the modification function to the 'Action' column
     df['Action'] = df.apply(modify_action, axis=1)
