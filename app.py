@@ -1,14 +1,16 @@
 import os
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, session, redirect
 import pandas as pd
 import openpyxl
 from openpyxl.utils.dataframe import dataframe_to_rows
+from idle_time_analysis import perform_idle_time_analysis
+import tempfile
+from datetime import time
 
-CSV_HEADER_ROW = 2 
+CSV_HEADER_ROW = 2
 
 app = Flask(__name__, static_url_path='/static')
-
-
+app.secret_key = 'your_secret_key'  # Add a secret key for sessions
 
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'output'
@@ -17,12 +19,68 @@ ALLOWED_EXTENSIONS = {'csv'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 
+# Define the allowed_file function
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+# Initialize df in the session
+def initialize_session_data():
+    session['df'] = None
+
 @app.route('/')
 def home():
+    # Initialize session data
+    initialize_session_data()
     return render_template('upload.html')
+
+
+# 1. Update Flask Routes
+
+
+
+    
+@app.route('/idle_time_analysis', methods=['GET', 'POST'])
+def idle_time_analysis():
+    if request.method == 'POST':
+        # Handle POST request
+        username = request.form['username']
+        # Perform the idle time analysis
+        df = pd.read_csv(session['df'], skiprows=3)  # Read CSV while skipping the first 3 rows
+        df['DateTime'] = pd.to_datetime(df['DateTime'], format='%I:%M %p')
+
+        # Define the start and end times as time objects
+        start_time = pd.Timestamp('1900-01-01 20:00:00').time()  # 8:00 PM
+        end_time = pd.Timestamp('1900-01-01 23:59:59').time()    # 11:59:59 PM
+
+        # Extract the time part from DateTime
+        df['Time'] = df['DateTime'].dt.time
+
+        # Filter data between start_time and end_time
+        user_data = df[(df['UserID'] == username) & (df['Time'] >= start_time) & (df['Time'] <= end_time)]
+
+        # Calculate TimeDiff within user_data
+        user_data['TimeDiff'] = user_data['DateTime'].diff().dt.total_seconds() / 60
+        # Make sure to perform this calculation only if user_data is not empty to avoid errors.
+
+        return render_template('user_data.html', username=username, user_data=user_data, start_time=start_time, end_time=end_time)
+    elif request.method == 'GET':
+        # Handle GET request, show a form to input username
+        return render_template('idle_time_input.html')
+
+
+
+
+
+# @app.route('/display_excel')
+# def display_excel():
+#     # Load the CSV file
+#     csv_file = 'LogLookupReport_MR.csv'
+#     with open(csv_file, 'r') as file:
+#         csv_data = file.read()
+
+#     return render_template('display.html', csv_data=csv_data)
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -35,13 +93,18 @@ def upload_file():
         return "No selected file"
 
     if file and allowed_file(file.filename):
-        # Save the uploaded file
-        filename = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        # Create a temporary file to store the uploaded file
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        filename = temp_file.name
         file.save(filename)
 
         # Process the uploaded CSV file
         df = pd.read_csv(filename, header=CSV_HEADER_ROW)
         df['DateTime'] = pd.to_datetime(df['DateTime'], format='%I:%M %p')
+
+       
+        # Store the file path in the session
+        session['df'] = filename
 
         # Create a new Excel workbook
         output_excel_file = os.path.join(app.config['OUTPUT_FOLDER'], 'processed_data.xlsx')
@@ -74,11 +137,21 @@ def upload_file():
 
         # Provide a link to download the processed file
         download_link = f'<a href="/download/{output_excel_file}">Download Processed Excel File</a>'
+        return redirect('/processing_done') 
 
-        return render_template('processing_done.html', download_link=download_link)
+
+@app.route('/processing_done')
+def processing_done():
+    # You can customize this route as needed, and render a template or add additional logic
+    return render_template('processing_done.html')
+
+@app.route('/to_do_list')
+def todolist():
+    return render_template('to_do_list.html')
 
 @app.route('/download/<path:filename>')
 def download_file(filename):
+    print(f"Downloading file: {filename}")  # Add this line for debugging
     return send_file(filename, as_attachment=True)
 
 if __name__ == '__main__':
