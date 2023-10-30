@@ -112,7 +112,6 @@ p {
     color: #333;
 }
 
-<<<<<<< HEAD
 
 
 .floating-buttons {
@@ -137,9 +136,4 @@ p {
 
 .floating-buttons a:hover {
     background-color: #555;
-=======
-.delete{
-    color: red;
-    cursor: pointer;
->>>>>>> d6770da7ad616c82a36bfa8ef9e1d1fce6ef2bfa
 }
