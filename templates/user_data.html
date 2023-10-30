@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<<<<<<< HEAD
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
@@ -49,13 +50,24 @@
         }
         a:hover {
             text-decoration: underline;
+=======
+    <title>User Data</title>
+    <style>
+        .highlight-red {
+            background-color: red;
+            color: white; /* Change text color for better visibility */
+>>>>>>> d6770da7ad616c82a36bfa8ef9e1d1fce6ef2bfa
         }
     </style>
 </head>
 <body>
     <h1>User Data for {{ username }}</h1>
     
+<<<<<<< HEAD
     <table>
+=======
+    <table border="1">
+>>>>>>> d6770da7ad616c82a36bfa8ef9e1d1fce6ef2bfa
         <tr>
             <th>UserID</th>
             <th>Product</th>
@@ -71,7 +83,11 @@
             <th>Time Difference</th>
         </tr>
         {% for index, row in user_data.iterrows() %}
+<<<<<<< HEAD
             <tr {% if row['TimeDiff'] > 14 %} class="highlight-red" id="highlight-red" {% endif %}>
+=======
+            <tr  {% if row['TimeDiff'] > 14 %} class="highlight-red"{% endif %} >
+>>>>>>> d6770da7ad616c82a36bfa8ef9e1d1fce6ef2bfa
                 <td>{{ row['UserID'] }}</td>
                 <td>{{ row['Product'] }}</td>
                 <td>{{ row['BinLabel'] }}</td>
@@ -88,9 +104,15 @@
         {% endfor %}
     </table>
 
+<<<<<<< HEAD
     <div class="floating-buttons">
         <a href="{{ url_for('idle_time_analysis') }}">Check Another Picker</a>
         <a href="/">Back to Home</a>
     </div>
+=======
+    
+    <p><a href="{{ url_for('idle_time_analysis') }}">Check Another Picker</a></p>
+    <p><a href="/">Back to Home</a></p>
+>>>>>>> d6770da7ad616c82a36bfa8ef9e1d1fce6ef2bfa
 </body>
 </html>
