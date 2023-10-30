@@ -35,12 +35,9 @@ def home():
     return render_template('upload.html')
 
 
-<<<<<<< HEAD
-=======
 # 1. Update Flask Routes
 
 
->>>>>>> d6770da7ad616c82a36bfa8ef9e1d1fce6ef2bfa
 
     
 @app.route('/idle_time_analysis', methods=['GET', 'POST'])
@@ -148,12 +145,9 @@ def processing_done():
     # You can customize this route as needed, and render a template or add additional logic
     return render_template('processing_done.html')
 
-<<<<<<< HEAD
-=======
 @app.route('/to_do_list')
 def todolist():
     return render_template('to_do_list.html')
->>>>>>> d6770da7ad616c82a36bfa8ef9e1d1fce6ef2bfa
 
 @app.route('/download/<path:filename>')
 def download_file(filename):
