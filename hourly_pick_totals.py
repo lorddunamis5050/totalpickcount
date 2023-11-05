@@ -11,7 +11,7 @@ def calculate_pick_totals(df, action_filter):
     filtered_df = df[(df['Action'].isin(action_filter)) & (df['DateTime'].dt.hour >= 20) & (df['DateTime'].dt.hour < 24)]
     
     # Group by hour and sum quantities
-    pick_totals = filtered_df.groupby(filtered_df['DateTime'].dt.hour)['Quantity'].sum().to_dict()
+    pick_totals = filtered_df.groupby(filtered_df['DateTime'].dt.hour)['Quantity'].apply(lambda x: abs(x).sum()).to_dict()
     
     return pick_totals
 
