@@ -11,7 +11,7 @@ def perform_idle_time_analysis(df):
     df = df.loc[(df['DateTime'] >= start_time) & (df['DateTime'] <= end_time)].copy()
 
     # Filter rows to include only specific pick types
-    valid_pick_types = ['REPLENISHMENT PICK', 'PUTWALL PICKING', 'REGULAR PICK', 'SINGLE PICK', 'QUICK MOVE']
+    valid_pick_types = ['REPLENISHMENT PICK', 'PUTWALL PICKING', 'REGULAR PICK', 'SINGLE PICK', 'QUICK MOVE', 'RESOLVE MOVE']
     df = df[df['Action'].isin(valid_pick_types)]
 
     # Calculate the time difference between each action for each user

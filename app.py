@@ -120,6 +120,9 @@ def upload_file():
         from single_pick import perform_single_pick_analysis
         perform_single_pick_analysis(df, book)
 
+        from resolve import peform_resolve_analysis
+        peform_resolve_analysis(df, book)   
+
         from replenishment_pick import perform_replenishment_pick_analysis
         perform_replenishment_pick_analysis(df, book)
 
@@ -131,6 +134,8 @@ def upload_file():
 
         from hourly_pick_totals import perform_hourly_pick_totals_analysis
         perform_hourly_pick_totals_analysis(df, book)
+
+        
 
         # Save the Excel file
         book.save(output_excel_file)
