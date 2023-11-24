@@ -2,6 +2,7 @@ import openpyxl
 import pandas as pd
 from openpyxl.utils.dataframe import dataframe_to_rows
 import numpy as np
+from openpyxl.styles import PatternFill
 
 def perform_putwall_pick_analysis(df, book):
     # Define your desired time range for PUTWALL PICKING
@@ -36,26 +37,40 @@ def perform_putwall_pick_analysis(df, book):
         PutwallPickingQuantity=('Quantity', 'sum')
     ).reset_index()
 
-        # Function to calculate the duration of putwall picking actions
     def calculate_putwall_picking_time(group):
         group = group.sort_values('DateTime')
-     # Duration in minutes for each row
-        group['Duration'] = group['DateTime'].diff().shift(-1).dt.total_seconds().div(60)
+        
+        # Calculate the duration in minutes to the next row
+        # No need to shift the 'DateTime' column before calculating the difference
+        group['Duration'] = group['DateTime'].diff().dt.total_seconds().div(60).abs()
+
         # Mark the rows that are not part of continuous putwall picking
-        group['IsGap'] = ~group['Action'].eq('PUTWALL PICKING') | group['Action'].shift().ne('PUTWALL PICKING')
+        # Also consider if the duration to the next action is more than 10 minutes as a gap
+        group['IsGap'] = (~group['Action'].eq('PUTWALL PICKING') |
+                        group['Action'].shift().ne('PUTWALL PICKING') |
+                        (group['Duration'] > 10))
+
         # Cumulatively sum the gap marks to create unique session IDs
         group['SessionId'] = group['IsGap'].cumsum()
+
         # Filter out non-putwall picking rows and rows that start a new session
         putwall_sessions = group[group['Action'].eq('PUTWALL PICKING') & ~group['IsGap']]
-        # Sum the durations for each session
-        session_durations = putwall_sessions.groupby('SessionId')['Duration'].sum()
+
+        # Calculate start and end time for each session
+        session_times = putwall_sessions.groupby('SessionId').agg({'DateTime': ['min', 'max']}) 
+
+        # Calculate duration for each session
+        session_durations = (session_times['DateTime']['max']  - session_times['DateTime']['min']).dt.total_seconds().div(60) 
+
         return session_durations.sum()  # Return the total time across all sessions
+
+
 
     # Filter for putwall picking actions only
     putwall_picking_actions = filtered_df_putwall[filtered_df_putwall['Action'] == 'PUTWALL PICKING']
 
     # Calculate total putwall picking time for each user considering gaps
-    total_putwall_picking_time = putwall_picking_actions.groupby('UserID').apply(calculate_putwall_picking_time).reset_index(name='TotalPutwallPickingMinutes')
+    total_putwall_picking_time = putwall_picking_actions.groupby('UserID').apply(calculate_putwall_picking_time).reset_index(name='Time')
 
     # Merge this time with the putwall_picking_per_user DataFrame
     putwall_picking_per_user = putwall_picking_per_user.merge(total_putwall_picking_time, on='UserID', how='left')
@@ -63,7 +78,7 @@ def perform_putwall_pick_analysis(df, book):
 
 # Calculate UPH (Units Per Hour) for each user using the total putwall picking time
     putwall_picking_per_user['UPH'] = putwall_picking_per_user.apply(
-    lambda row: (row['PutwallPickingQuantity'] * 60) / row['TotalPutwallPickingMinutes'] if row['TotalPutwallPickingMinutes'] >= 30 else 0, axis=1
+    lambda row: (row['PutwallPickingQuantity'] * 60) / row['Time'] if row['Time'] >= 30 else 0, axis=1
     )
 
     # Calculate UPH for each user, using the highest time as the denominator
@@ -79,6 +94,8 @@ def perform_putwall_pick_analysis(df, book):
         # Replace NaN or infinite values with zero
     putwall_picking_per_user.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
 
+    light_blue_fill = PatternFill(start_color="ADD8E6", end_color="ADD8E6", fill_type="solid")
+
 
     # Create the "PUTWALL PICKING" sheet if it doesn't exist
     if 'PUTWALL PICKING' not in book.sheetnames:
@@ -86,12 +103,25 @@ def perform_putwall_pick_analysis(df, book):
     else:
         putwall_picking_sheet = book['PUTWALL PICKING']
 
-    # Update the header row to include 'TotalPutwallPickingMinutes'
-    header_row = ['UserID', 'PutwallPickingQuantity', 'TotalPutwallPickingMinutes', 'UPH']
+    # Update the header row to include 'Time'
+    header_row = ['UserID', 'PutwallPickingQuantity', 'Time', 'UPH']
     putwall_picking_sheet.append(header_row)
 
+        # Format header row with light blue background
+    for cell in putwall_picking_sheet[1]:
+        cell.fill = light_blue_fill
+
     # Convert the DataFrame to a list of lists for writing to Excel
-    putwall_picking_data = putwall_picking_per_user[['UserID', 'PutwallPickingQuantity', 'TotalPutwallPickingMinutes', 'UPH']].values.tolist()
+        # Sort by UPH in descending order
+    putwall_picking_per_user.sort_values(by='UPH', ascending=False, inplace=True)
+
+
+        # Calculate the average UPH, excluding zeros, and round to 2 decimal places
+    average_uph = putwall_picking_per_user.loc[putwall_picking_per_user['UPH'] > 0, 'UPH'].mean().round(2)
+
+    
+    putwall_picking_data = putwall_picking_per_user[['UserID', 'PutwallPickingQuantity', 'Time', 'UPH']].values.tolist()
+
 
     # Write the data to the Excel sheet
     for row_data in putwall_picking_data:
@@ -100,6 +130,9 @@ def perform_putwall_pick_analysis(df, book):
     # Write the average UPH row to the Excel sheet
     average_uph_row = ["Average UPH", "", "", average_uph]
     putwall_picking_sheet.append(average_uph_row)
+
+    for cell in putwall_picking_sheet[putwall_picking_sheet.max_row]:
+        cell.fill = light_blue_fill
 
     print("PUTWALL PICKING analysis completed.")
 
