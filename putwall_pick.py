@@ -86,7 +86,7 @@ def perform_putwall_pick_analysis(df, book):
 
         # Convert both "PutwallPickingQuantity" and "UPH" values to their absolute values
     putwall_picking_per_user['PutwallPickingQuantity'] = abs(putwall_picking_per_user['PutwallPickingQuantity'])
-    putwall_picking_per_user['UPH'] = abs(putwall_picking_per_user['UPH'])
+    putwall_picking_per_user['UPH'] = abs(putwall_picking_per_user['UPH']).round(2)
 
     # Calculate the average UPH, excluding zeros
     average_uph = putwall_picking_per_user.loc[putwall_picking_per_user['UPH'] > 0, 'UPH'].mean()
