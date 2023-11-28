@@ -1,0 +1,23 @@
+[33mcommit 11c0fa192c0d53bef99a0792c105d0b34eb5b795[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: prince forson <princeforson22@gmail.com>
+Date:   Wed Nov 22 13:06:58 2023 -0500
+
+    fixing uph
+
+[33mcommit ea15ab7aceeef8a5ad9bd46735b17fdfd3ae3794[m
+Author: prince forson <princeforson22@gmail.com>
+Date:   Sun Nov 5 02:46:45 2023 -0500
+
+    added resolve count to affect idle time
+
+[33mcommit 630ba5bcad3e909191ae9d6f749c5cb1f42eda25[m
+Author: prince forson <princeforson22@gmail.com>
+Date:   Sun Nov 5 02:01:58 2023 -0500
+
+    changed negative vlaues or total picks to abs values
+
+[33mcommit b7b6aebb56e0c528ba650f0993ca2607b47d79de[m
+Author: prince forson <princeforson22@gmail.com>
+Date:   Sun Nov 5 01:07:16 2023 -0400
+
+    added scroll through idle times
