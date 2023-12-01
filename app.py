@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, send_file, session, redirect
+from flask import Flask, render_template, request, send_file, session, redirect, jsonify
 import pandas as pd
 import openpyxl
 from openpyxl.utils.dataframe import dataframe_to_rows
@@ -72,14 +72,7 @@ def idle_time_analysis():
 
 
 
-# @app.route('/display_excel')
-# def display_excel():
-#     # Load the CSV file
-#     csv_file = 'LogLookupReport_MR.csv'
-#     with open(csv_file, 'r') as file:
-#         csv_data = file.read()
 
-#     return render_template('display.html', csv_data=csv_data)
 
 
 @app.route('/upload', methods=['POST'])
@@ -143,6 +136,9 @@ def upload_file():
         # Provide a link to download the processed file
         download_link = f'<a href="/download/{output_excel_file}">Download Processed Excel File</a>'
         return redirect('/processing_done') 
+    
+
+
 
 
 @app.route('/processing_done')
@@ -158,6 +154,31 @@ def todolist():
 def download_file(filename):
     print(f"Downloading file: {filename}")  # Add this line for debugging
     return send_file(filename, as_attachment=True)
+
+@app.route('/get_user_data', methods=['POST'])
+def get_user_data():
+    user_ids = request.form['user_ids'].split(',')  # Split the input into a list
+    user_ids = [uid.strip() for uid in user_ids]  # Strip whitespace from each UserID
+
+    try:
+        excel_file = os.path.join(app.config['OUTPUT_FOLDER'], 'processed_data.xlsx')
+        sheet_names = ['REPLENISHMENT PICK', 'SINGLE PICK', 'REGULAR PICK' , 'PUTWALL PICKING'] 
+        df_list = []
+        for sheet_name in sheet_names:             
+            df = pd.read_excel(excel_file, sheet_name=sheet_names)  # Replace with your actual sheet name
+            df_list.append(df)
+        combined_df = pd.concat(df_list, ignore_index=True)
+
+        filtered_df = df[df['UserID'].isin(user_ids)]
+        # Convert DataFrame to HTML table for easy rendering
+        data_html = filtered_df.to_html(classes='data', index=False)
+       
+
+
+        return render_template('display_user_data.html', table=data_html)
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

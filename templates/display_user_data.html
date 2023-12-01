@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Data</title>
+    <style>
+        .data {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .data td, .data th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .data tr:nth-child(even){background-color: #f2f2f2;}
+        .data tr:hover {background-color: #ddd;}
+        .data th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #04AA6D;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>User Data</h1>
+    {% if table.strip() %}
+        {{ table|safe }}
+    {% else %}
+        <p>No data found for the provided UserIDs.</p>
+    {% endif %}
+
+</body>
+</html>

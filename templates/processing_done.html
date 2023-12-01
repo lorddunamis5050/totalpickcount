@@ -82,6 +82,12 @@
             <a class="btn" href="{{ url_for('download_file', filename='output/processed_data.xlsx') }}"><i class="fas fa-file-excel"></i>Download <br> Excel File</a>
             <a class="btn" href="{{ url_for('idle_time_analysis') }}"><i class="fas fa-clock"></i> Idle Time <br>Analysis</a>
         </div>
+        <form action="/get_user_data" method="post">
+            <label for="user_ids">User IDs (comma-separated):</label><br>
+            <input type="text" id="user_ids" name="user_ids"><br>
+            <input type="submit" value="Submit">
+        </form>
+        
     </div>
 </body>
 
