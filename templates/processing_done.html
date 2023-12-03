@@ -31,6 +31,12 @@
             margin-left: 3em;
         }
 
+     
+        label {
+            display: block;
+            margin-bottom: 0.5em;
+        }
+
         /* Neumorphism inspired button */
         .btn {
             background: #e0e0e0;
@@ -51,16 +57,46 @@
             flex-direction: column;
         }
 
-        .btn:hover {
-            box-shadow:  5px 5px 10px #bebebe, 
-                        -5px -5px 10px #ffffff;
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .btn i {
-            margin-bottom: 8px;
-            color: #000000;
-            font-size: 24px;
+                /* Black Button */
+            button {
+            background-color: #000;
+            color: #FFF;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s all;
         }
+
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        p {
+            margin-top: 2em;
+        }
+
+        a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
 
         .buttons-container {
             display: flex;
@@ -70,6 +106,9 @@
 
         a{
             text-align: center;
+        }
+        .userdatacheck{
+            margin-top: 30px;
         }
     </style>
 </head>
@@ -82,11 +121,14 @@
             <a class="btn" href="{{ url_for('download_file', filename='output/processed_data.xlsx') }}"><i class="fas fa-file-excel"></i>Download <br> Excel File</a>
             <a class="btn" href="{{ url_for('idle_time_analysis') }}"><i class="fas fa-clock"></i> Idle Time <br>Analysis</a>
         </div>
+        <div class="userdatacheck">
         <form action="/get_user_data" method="post">
-            <label for="user_ids">User IDs (comma-separated):</label><br>
+          
+            <label for="user_ids"> Get UPH for specific Users. <br>User IDs (comma-separated):</label>
             <input type="text" id="user_ids" name="user_ids"><br>
-            <input type="submit" value="Submit">
+            <button type="submit">Submit</button>
         </form>
+    </div>
         
     </div>
 </body>

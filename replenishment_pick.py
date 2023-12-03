@@ -85,10 +85,10 @@ def perform_replenishment_pick_analysis(df, book):
 
             # Convert both "PutwallPickingQuantity" and "UPH" values to their absolute values
     replenishment_pick_per_user['ReplenishmentPickQuantity'] = abs(replenishment_pick_per_user['ReplenishmentPickQuantity'])
-    replenishment_pick_per_user['UPH'] = abs(replenishment_pick_per_user['UPH']).round(2)
+    replenishment_pick_per_user['UPH'] = abs(replenishment_pick_per_user['UPH']).round(1)
 
         # Calculate the average UPH, excluding zeros
-    average_uph = replenishment_pick_per_user.loc[replenishment_pick_per_user['UPH'] > 0, 'UPH'].mean().round(2)
+    average_uph = replenishment_pick_per_user.loc[replenishment_pick_per_user['UPH'] > 0, 'UPH'].mean().round(1)
 
             # Replace NaN or infinite values with zero
     replenishment_pick_per_user.replace([np.inf, -np.inf, np.nan], 0, inplace=True)
@@ -115,7 +115,7 @@ def perform_replenishment_pick_analysis(df, book):
     replenishment_pick_per_user.sort_values(by='UPH', ascending=False, inplace=True)    
 
             # Calculate the average UPH, excluding zeros, and round to 2 decimal places
-    average_uph = replenishment_pick_per_user.loc[replenishment_pick_per_user['UPH'] > 0, 'UPH'].mean().round(2)
+    average_uph = replenishment_pick_per_user.loc[replenishment_pick_per_user['UPH'] > 0, 'UPH'].mean().round(1)
 
 
             # Convert the DataFrame to a list of lists for writing to Excel

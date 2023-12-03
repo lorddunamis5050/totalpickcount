@@ -117,7 +117,11 @@ def perform_putwall_pick_analysis(df, book):
 
 
         # Calculate the average UPH, excluding zeros, and round to 2 decimal places
-    average_uph = putwall_picking_per_user.loc[putwall_picking_per_user['UPH'] > 0, 'UPH'].mean().round(2)
+    if putwall_picking_per_user.loc[putwall_picking_per_user['UPH'] > 0, 'UPH'].empty:
+        average_uph = 0  # Or any default value you want to use in case of no data
+    else:
+        average_uph = putwall_picking_per_user.loc[putwall_picking_per_user['UPH'] > 0, 'UPH'].mean().round(1)
+
 
     
     putwall_picking_data = putwall_picking_per_user[['UserID', 'PutwallPickingQuantity', 'Time', 'UPH']].values.tolist()

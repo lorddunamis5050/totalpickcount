@@ -128,6 +128,10 @@ def upload_file():
         from hourly_pick_totals import perform_hourly_pick_totals_analysis
         perform_hourly_pick_totals_analysis(df, book)
 
+        from picks_per_zones import perform_pick_totals_analysis_per_zones
+        perform_pick_totals_analysis_per_zones(df, book)
+
+
         
 
         # Save the Excel file
@@ -157,26 +161,25 @@ def download_file(filename):
 
 @app.route('/get_user_data', methods=['POST'])
 def get_user_data():
-    user_ids = request.form['user_ids'].split(',')  # Split the input into a list
-    user_ids = [uid.strip() for uid in user_ids]  # Strip whitespace from each UserID
+    user_ids = request.form['user_ids'].split(',')
+    user_ids = [uid.strip() for uid in user_ids]
 
     try:
         excel_file = os.path.join(app.config['OUTPUT_FOLDER'], 'processed_data.xlsx')
-        sheet_names = ['REPLENISHMENT PICK', 'SINGLE PICK', 'REGULAR PICK' , 'PUTWALL PICKING'] 
-        df_list = []
-        for sheet_name in sheet_names:             
-            df = pd.read_excel(excel_file, sheet_name=sheet_names)  # Replace with your actual sheet name
-            df_list.append(df)
-        combined_df = pd.concat(df_list, ignore_index=True)
+        sheet_names = ['REPLENISHMENT PICK', 'SINGLE PICK', 'REGULAR PICK', 'PUTWALL PICKING']
+        tables = {}
 
-        filtered_df = df[df['UserID'].isin(user_ids)]
-        # Convert DataFrame to HTML table for easy rendering
-        data_html = filtered_df.to_html(classes='data', index=False)
-       
+        for sheet_name in sheet_names:
+            df = pd.read_excel(excel_file, sheet_name=sheet_name)
+            if not df.empty and df['UserID'].isin(user_ids).any():
+                filtered_df = df[df['UserID'].isin(user_ids)]
+                tables[sheet_name] = filtered_df.to_html(classes='data', index=False)
 
+        if tables:
+            return render_template('display_user_data.html', tables=tables)
+        else:
+            return render_template('no_data_found.html')  # You should create this template
 
-        return render_template('display_user_data.html', table=data_html)
-    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
