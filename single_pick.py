@@ -24,7 +24,7 @@ def perform_single_pick_analysis(df , book):
         packslip = row['Packslip']
         datetime = row['DateTime']
 
-        if (action == 'REPLNISH' and len(str(packslip)) >= 7 and str(packslip)[6] == 'S' and datetime >= START_TIME_PUTWALL and datetime <= END_TIME_PUTWALL) or packslip == 'LATE':
+        if (action == 'REPLNISH' and len(str(packslip)) >= 7 and str(packslip)[6] == 'S' and datetime >= START_TIME_PUTWALL and datetime <= END_TIME_PUTWALL) or packslip == 'LATE' or  packslip == 'LATE-PRIO':
          return 'SINGLE PICK'
 
         return action

@@ -20,7 +20,7 @@ def perform_putwall_pick_analysis(df, book):
         action = row['Action']
         bin_label = row['BinLabel']
         
-        if action == 'PICKLINE' and bin_label.startswith('MW'):
+        if action == 'PICKLINE' and bin_label.startswith('SH'):
             return 'PUTWALL PICKING'
         
         return action

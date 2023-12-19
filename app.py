@@ -107,6 +107,9 @@ def upload_file():
         from putwall_pick import perform_putwall_pick_analysis
         perform_putwall_pick_analysis(df, book)
 
+        from single_packing import perform_single_pick_analysis
+        perform_single_pick_analysis(df, book)
+
         from regular_pick import perform_regular_pick_analysis
         perform_regular_pick_analysis(df, book)
 
@@ -128,8 +131,10 @@ def upload_file():
         from hourly_pick_totals import perform_hourly_pick_totals_analysis
         perform_hourly_pick_totals_analysis(df, book)
 
-        from picks_per_zones import perform_pick_totals_analysis_per_zones
-        perform_pick_totals_analysis_per_zones(df, book)
+
+
+        # from picks_per_zones import perform_pick_totals_analysis_per_zones
+        # perform_pick_totals_analysis_per_zones(df, book)
 
 
         
