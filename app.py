@@ -107,14 +107,19 @@ def upload_file():
         from putwall_pick import perform_putwall_pick_analysis
         perform_putwall_pick_analysis(df, book)
 
-        from single_packing import perform_single_pick_analysis
-        perform_single_pick_analysis(df, book)
+        from single_packing import perform_single_pack_analysis
+        perform_single_pack_analysis(df, book)
+
+        from multi_pack import perform_multi_pack_analysis
+        perform_multi_pack_analysis(df, book)
 
         from regular_pick import perform_regular_pick_analysis
         perform_regular_pick_analysis(df, book)
 
         from single_pick import perform_single_pick_analysis
         perform_single_pick_analysis(df, book)
+
+        
 
         from resolve import peform_resolve_analysis
         peform_resolve_analysis(df, book)   

@@ -4,7 +4,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 import numpy as np
 from openpyxl.styles import PatternFill
 
-def perform_single_pack_analysis(df, book):
+def perform_multi_pack_analysis(df, book):
     # Define your desired time range for PUTWALL PICKING
     start_time_putwall = pd.to_datetime('8:00 PM', format='%I:%M %p')
     end_time_putwall = pd.to_datetime('11:59 PM', format='%I:%M %p')
@@ -13,20 +13,20 @@ def perform_single_pack_analysis(df, book):
     df['DateTime'] = pd.to_datetime(df['DateTime'])
 
     # Initialize a DataFrame to store PUTWALL PICKING data per user
-    putwall_picking_per_user = pd.DataFrame(columns=['UserID', 'SinglePackingQuantity'])
+    putwall_picking_per_user = pd.DataFrame(columns=['UserID', 'multiPackingQuantity'])
 
     # Function to modify the 'Action' column based on 'BinLabel' for PUTWALL PICKING
-    def modify_action_single_packing(row):
+    def modify_action_multi_packing(row):
         action = row['Action']
         bin_label = row['BinLabel']
         
         if action == 'PICKLINE' and bin_label.startswith('SH'):
-            return 'SINGLE PACKING'
+            return 'multi PACKING'
         
         return action
 
     # Apply the function to the DataFrame for PUTWALL PICKING
-    df['Action'] = df.apply(modify_action_single_packing, axis=1)
+    df['Action'] = df.apply(modify_action_multi_packing, axis=1)
 
   # Filter rows based on the specified time range for PUTWALL PICKING
     filtered_df_putwall = df[(df['DateTime'] >= start_time_putwall) & (df['DateTime'] <= end_time_putwall)]
@@ -34,7 +34,7 @@ def perform_single_pack_analysis(df, book):
 
     # Group by "UserID" and calculate total Units picked
     putwall_picking_per_user = filtered_df_putwall[filtered_df_putwall['Action'] == 'PUTWALL PICKING'].groupby('UserID').agg(
-        SinglePackingQuantity=('Quantity', 'sum')
+        multiPackingQuantity=('Quantity', 'sum')
     ).reset_index()
 
     def calculate_putwall_picking_time(group):
@@ -78,14 +78,14 @@ def perform_single_pack_analysis(df, book):
 
 # Calculate UPH (Units Per Hour) for each user using the total putwall picking time
     putwall_picking_per_user['UPH'] = putwall_picking_per_user.apply(
-    lambda row: (row['SinglePackingQuantity'] * 60) / row['Time'] if row['Time'] >= 30 else 0, axis=1
+    lambda row: (row['multiPackingQuantity'] * 60) / row['Time'] if row['Time'] >= 30 else 0, axis=1
     )
 
     # Calculate UPH for each user, using the highest time as the denominator
-    # putwall_picking_per_user['UPH'] = putwall_picking_per_user['SinglePackingQuantity'] / highest_hours_worked
+    # putwall_picking_per_user['UPH'] = putwall_picking_per_user['multiPackingQuantity'] / highest_hours_worked
 
-        # Convert both "SinglePackingQuantity" and "UPH" values to their absolute values
-    putwall_picking_per_user['SinglePackingQuantity'] = abs(putwall_picking_per_user['SinglePackingQuantity'])
+        # Convert both "multiPackingQuantity" and "UPH" values to their absolute values
+    putwall_picking_per_user['multiPackingQuantity'] = abs(putwall_picking_per_user['multiPackingQuantity'])
     putwall_picking_per_user['UPH'] = abs(putwall_picking_per_user['UPH']).round(2)
 
     # Calculate the average UPH, excluding zeros
@@ -98,13 +98,13 @@ def perform_single_pack_analysis(df, book):
 
 
     # Create the "PUTWALL PICKING" sheet if it doesn't exist
-    if 'SINGLE PACKING' not in book.sheetnames:
-        putwall_picking_sheet = book.create_sheet('SINGLE PACKING')
+    if 'multi PACKING' not in book.sheetnames:
+        putwall_picking_sheet = book.create_sheet('multi PACKING')
     else:
-        putwall_picking_sheet = book['SINGLE PACKING']
+        putwall_picking_sheet = book['multi PACKING']
 
     # Update the header row to include 'Time'
-    header_row = ['UserID', 'SinglePackingQuantity', 'Time', 'UPH']
+    header_row = ['UserID', 'multiPackingQuantity', 'Time', 'UPH']
     putwall_picking_sheet.append(header_row)
 
         # Format header row with light blue background
@@ -124,7 +124,7 @@ def perform_single_pack_analysis(df, book):
 
 
     
-    putwall_picking_data = putwall_picking_per_user[['UserID', 'SinglePackingQuantity', 'Time', 'UPH']].values.tolist()
+    putwall_picking_data = putwall_picking_per_user[['UserID', 'multiPackingQuantity', 'Time', 'UPH']].values.tolist()
 
 
     # Write the data to the Excel sheet
@@ -138,5 +138,5 @@ def perform_single_pack_analysis(df, book):
     for cell in putwall_picking_sheet[putwall_picking_sheet.max_row]:
         cell.fill = light_blue_fill
 
-    print("SINGLE PACKING analysis completed.")
+    print("multi PACKING analysis completed.")
 
