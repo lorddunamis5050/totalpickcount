@@ -19,9 +19,11 @@ def perform_multi_pack_analysis(df, book):
     def modify_action_multi_packing(row):
         action = row['Action']
         bin_label = row['BinLabel']
+        packslip = row['Packslip']
         
-        if action == 'PICKLINE' and bin_label.startswith('SH'):
-            return 'multi PACKING'
+        if action == 'PACKLINE':
+                if bin_label.startswith(('1H', '1G', '2E', '2H', '3F', '3H', '3R', '2R', '1Y', '1C', '1D', '2D', '3D','MW','MF')) and not packslip.startswith('TR'):
+                    return 'multi PACKING'
         
         return action
 

@@ -33,7 +33,7 @@ def perform_single_pack_analysis(df, book):
 
 
     # Group by "UserID" and calculate total Units picked
-    putwall_picking_per_user = filtered_df_putwall[filtered_df_putwall['Action'] == 'PUTWALL PICKING'].groupby('UserID').agg(
+    putwall_picking_per_user = filtered_df_putwall[filtered_df_putwall['Action'] == 'SINGLE PACKING'].groupby('UserID').agg(
         SinglePackingQuantity=('Quantity', 'sum')
     ).reset_index()
 
@@ -46,15 +46,15 @@ def perform_single_pack_analysis(df, book):
 
         # Mark the rows that are not part of continuous putwall picking
         # Also consider if the duration to the next action is more than 10 minutes as a gap
-        group['IsGap'] = (~group['Action'].eq('PUTWALL PICKING') |
-                        group['Action'].shift().ne('PUTWALL PICKING') |
+        group['IsGap'] = (~group['Action'].eq('SINGLE PACKING') |
+                        group['Action'].shift().ne('SINGLE PACKING') |
                         (group['Duration'] > 10))
 
         # Cumulatively sum the gap marks to create unique session IDs
         group['SessionId'] = group['IsGap'].cumsum()
 
         # Filter out non-putwall picking rows and rows that start a new session
-        putwall_sessions = group[group['Action'].eq('PUTWALL PICKING') & ~group['IsGap']]
+        putwall_sessions = group[group['Action'].eq('SINGLE PACKING') & ~group['IsGap']]
 
         # Calculate start and end time for each session
         session_times = putwall_sessions.groupby('SessionId').agg({'DateTime': ['min', 'max']}) 
@@ -67,7 +67,7 @@ def perform_single_pack_analysis(df, book):
 
 
     # Filter for putwall picking actions only
-    putwall_picking_actions = filtered_df_putwall[filtered_df_putwall['Action'] == 'PUTWALL PICKING']
+    putwall_picking_actions = filtered_df_putwall[filtered_df_putwall['Action'] == 'SINGLE PACKING']
 
     # Calculate total putwall picking time for each user considering gaps
     total_putwall_picking_time = putwall_picking_actions.groupby('UserID').apply(calculate_putwall_picking_time).reset_index(name='Time')
