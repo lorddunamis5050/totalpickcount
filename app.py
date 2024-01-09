@@ -136,6 +136,9 @@ def upload_file():
         from hourly_pick_totals import perform_hourly_pick_totals_analysis
         perform_hourly_pick_totals_analysis(df, book)
 
+        from hourly_packs_total import perform_hourly_pack_totals_analysis
+        perform_hourly_pack_totals_analysis(df, book)
+
 
 
         # from picks_per_zones import perform_pick_totals_analysis_per_zones
