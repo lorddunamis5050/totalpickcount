@@ -8,7 +8,7 @@ END_TIME = pd.to_datetime('11:59 PM', format='%I:%M %p')
 
 def calculate_pick_totals(df, action_filter):
     # Filter the DataFrame by action_filter and time range
-    filtered_df = df[(df['Action'].isin(action_filter)) & (df['DateTime'].dt.hour >= 20) & (df['DateTime'].dt.hour < 24)]
+    filtered_df = df[(df['Action'].isin(action_filter)) & (df['DateTime'].dt.hour >= 0) & (df['DateTime'].dt.hour < 7)]
     
     # Group by hour and sum quantities
     pick_totals = filtered_df.groupby(filtered_df['DateTime'].dt.hour)['Quantity'].apply(lambda x: abs(x).sum()).to_dict()
@@ -16,12 +16,11 @@ def calculate_pick_totals(df, action_filter):
     return pick_totals
 
 def perform_hourly_pick_totals_analysis(df, book):
-    # Define the pick types and corresponding action filters
+    # Define the pick types and corresponding action filters with 'Multi Pick' combined
     pick_types = {
-        'Regular Pick': ['REGULAR PICK'],
         'Single Pick': ['SINGLE PICK'],
         'Replenishment Pick': ['REPLENISHMENT PICK'],
-        'Putwall Pick': ['PUTWALL PICKING']
+        'Multi Pick': ['REGULAR PICK', 'PUTWALL PICKING'] 
     }
 
     # Create the "Total Units picked by hour" sheet if it doesn't exist
@@ -35,7 +34,7 @@ def perform_hourly_pick_totals_analysis(df, book):
     hourly_pick_totals_sheet.append(header_row)
 
     # Calculate and write the total quantity for each hour and pick type
-    for hour in range(20, 24):
+    for hour in range(0, 7):
         hour_data = [hour]
 
         for pick_type, action_filter in pick_types.items():
