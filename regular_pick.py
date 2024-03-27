@@ -17,7 +17,7 @@ def perform_regular_pick_analysis(df , book):
         packslip = row['Packslip']
 
         if action == 'PICKLINE':
-            if bin_label.startswith(('1H', '1G', '2E', '2H', '3F', '3H', '3R', '2R', '1Y', '1C', '1D', '2D', '3D','MW','MF','1A','1B')) and not packslip.startswith('TR') and len(packslip) != 6:
+            if bin_label.startswith(('1H', '1G', '2E', '2H', '3F', '3H', '3R', '2R', '1Y', '1C', '1D', '2D', '3D','MW','MF','1A','1B','MZ')) and not packslip.startswith('TR') and len(packslip) != 6:
                 return 'REGULAR PICK'
 
         return action

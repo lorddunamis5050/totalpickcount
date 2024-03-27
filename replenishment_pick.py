@@ -14,15 +14,14 @@ def perform_replenishment_pick_analysis(df, book):
     # Initialize DataFrames to store replenishment pick data
     replenishment_pick_per_user = pd.DataFrame(columns=['UserID', 'ReplenishmentPickQuantity'])
 
-    # Function to check for "REPLENISHMENT PICK"
     def modify_action(row):
         action = row['Action']
         packslip = row['Packslip']
 
         if action == 'REPLNISH' and len(str(packslip)) >= 7 and str(packslip)[6] == 'P':
             return 'REPLENISHMENT PICK'
-        elif packslip == 'BIG':
-            return 'REPLENISHMENT PICK'  # OR do something else for 'BIG'
+        elif packslip == 'BIG' or packslip == 'TR_GROUP2L':
+            return 'REPLENISHMENT PICK'  # OR do something else for 'BIG' or 'TR_GROUP2L'
 
         return action
 
